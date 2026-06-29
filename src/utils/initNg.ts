@@ -3,7 +3,7 @@ import { initNg } from "@ng-org/orm";
 
 export let session: Session | undefined;
 
-await init(
+init(
   async (event: any) => {
     session = event.session;
     // The ORM needs to have access to ng,
