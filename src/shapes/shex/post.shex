@@ -1,0 +1,11 @@
+PREFIX as: <https://www.w3.org/ns/activitystreams#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+as:Note {
+  a [as:Note] ;
+  as:title xsd:string
+    // rdfs:comment "The title of the post" ;
+  as:content xsd:string
+    // rdfs:comment "The content of the post" ;
+}
