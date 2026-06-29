@@ -68,6 +68,7 @@ const App: React.FC = () => (
             syncWithLocation: true,
             warnWhenUnsavedChanges: true,
             liveMode: "auto",
+            disableTelemetry: true,
           }}
         >
           <Routes>
