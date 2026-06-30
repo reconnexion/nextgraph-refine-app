@@ -41,7 +41,7 @@ const App: React.FC = () => (
         <Refine
           authProvider={authProvider}
           dataProvider={dataProvider({ dataModels })}
-          liveProvider={liveProvider}
+          liveProvider={liveProvider({ dataModels })}
           routerProvider={routerProvider}
           resources={[
             {

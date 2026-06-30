@@ -24,11 +24,6 @@ export const PostEdit = () => {
         <Form.Item
           label="Content"
           name="content"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
         >
           <MDEditor data-color-mode="light" />
         </Form.Item>
