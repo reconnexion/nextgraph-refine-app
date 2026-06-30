@@ -39,7 +39,7 @@ const App: React.FC = () => (
     <ConfigProvider theme={RefineThemes.Blue}>
       <AntdApp>
         <Refine
-          authProvider={authProvider}
+          // authProvider={authProvider}
           dataProvider={dataProvider({ dataModels })}
           liveProvider={liveProvider({ dataModels })}
           routerProvider={routerProvider}
@@ -74,14 +74,14 @@ const App: React.FC = () => (
           <Routes>
             <Route
               element={
-                <Authenticated
-                  key="authenticated-routes"
-                  fallback={<CatchAllNavigate to="/login" />}
-                >
+                // <Authenticated
+                //   key="authenticated-routes"
+                //   fallback={<CatchAllNavigate to="/login" />}
+                // >
                   <ThemedLayout>
                     <Outlet />
                   </ThemedLayout>
-                </Authenticated>
+                // </Authenticated>
               }
             >
               <Route index element={<DashboardPage />} />
@@ -94,7 +94,7 @@ const App: React.FC = () => (
               </Route>
             </Route>
 
-            <Route
+            {/* <Route
               element={
                 <Authenticated key="auth-pages" fallback={<Outlet />}>
                   <NavigateToResource resource="posts" />
@@ -103,15 +103,15 @@ const App: React.FC = () => (
             >
               <Route path="/login" element={<AuthPage />} />
               <Route path="/register" element={<AuthPage />} />
-            </Route>
+            </Route> */}
 
             <Route
               element={
-                <Authenticated key="catch-all">
+                // <Authenticated key="catch-all">
                   <ThemedLayout>
                     <Outlet />
                   </ThemedLayout>
-                </Authenticated>
+                // </Authenticated>
               }
             >
               <Route path="*" element={<ErrorComponent />} />
