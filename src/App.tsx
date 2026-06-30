@@ -35,7 +35,7 @@ import { DashboardPage } from "../src/pages/dashboard";
 import "./utils/initNg";
 
 const App: React.FC = () => (
-  <BrowserRouter>
+  <BrowserRouter basename={import.meta.env.MODE === 'production' ? '/nextgraph-refine-app/' : '/'}>
     <ConfigProvider theme={RefineThemes.Blue}>
       <AntdApp>
         <Refine
