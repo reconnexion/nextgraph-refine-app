@@ -34,6 +34,7 @@ export const PostList = () => {
         <Table.Column<Note>
           title="Actions"
           dataIndex="actions"
+          align="right"
           render={(_, record) => (
             <Space onClick={(e) => e.stopPropagation()}>
               <EditButton hideText size="small" recordItemId={record['@graph']} />

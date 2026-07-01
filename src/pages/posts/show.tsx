@@ -1,4 +1,5 @@
-import { useShow } from "@refinedev/core";
+import { useCallback } from "react";
+import { useShow, useNavigation, useNotification, type LiveEvent } from "@refinedev/core";
 import { Show, MarkdownField } from "@refinedev/antd";
 import { Typography } from "antd";
 import type { Note } from "../../shapes/orm/post.typings";
@@ -6,7 +7,20 @@ import type { Note } from "../../shapes/orm/post.typings";
 const { Title, Text } = Typography;
 
 export const PostShow = () => {
-  const { query: queryResult } = useShow<Note>();
+  const { list } = useNavigation();
+  const { open } = useNotification();
+
+  const onLiveEvent = useCallback((event: LiveEvent) => {
+    if (event.type === "deleted") {
+      open?.({
+        type: "error",
+        message: "This post has been deleted",
+      });
+      list("posts");
+    }
+  }, [open, list]);
+
+  const { query: queryResult } = useShow<Note>({ liveMode: "auto", onLiveEvent });
   const { data, isLoading } = queryResult;
   const record = data?.data;
 
