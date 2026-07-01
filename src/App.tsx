@@ -18,7 +18,7 @@ import routerProvider, {
   UnsavedChangesNotifier,
   DocumentTitleHandler,
 } from "@refinedev/react-router";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router";
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router";
 import { App as AntdApp, ConfigProvider } from "antd";
 
 import "@ant-design/v5-patch-for-react-19";
@@ -44,14 +44,14 @@ const App: React.FC = () => (
           liveProvider={liveProvider({ dataModels })}
           routerProvider={routerProvider}
           resources={[
-            {
-              name: "dashboard",
-              list: "/",
-              meta: {
-                label: "Dashboard",
-                icon: <DashboardOutlined />,
-              },
-            },
+            // {
+            //   name: "dashboard",
+            //   list: "/",
+            //   meta: {
+            //     label: "Dashboard",
+            //     icon: <DashboardOutlined />,
+            //   },
+            // },
             {
               name: "posts",
               list: "/posts",
@@ -84,7 +84,8 @@ const App: React.FC = () => (
                 // </Authenticated>
               }
             >
-              <Route index element={<DashboardPage />} />
+              <Route index element={<Navigate to="/" />} />
+              {/* <Route index element={<DashboardPage />} /> */}
 
               <Route path="/posts">
                 <Route index element={<PostList />} />

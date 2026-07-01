@@ -6,6 +6,6 @@ as:Note {
   a [as:Note] ;
   as:title xsd:string
     // rdfs:comment "The title of the post" ;
-  as:content xsd:string
+  as:content xsd:string ?
     // rdfs:comment "The content of the post" ;
 }

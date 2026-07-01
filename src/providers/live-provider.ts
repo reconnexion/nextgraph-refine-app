@@ -11,42 +11,47 @@ type LiveProviderConfig = {
 type UnwatchFn = () => void;
 
 const getSignalObject = async (shapeType: ShapeType<any>, ids?: string[]) : Promise<DeepSignalSet<any>> => {
-  const subscription = OrmSubscription.getOrCreate(shapeType, { graphs: ids || [] });
+  console.log('getSignalObject', ids);
+  const subscription = OrmSubscription.getOrCreate(shapeType, { graphs: ids || [''] });
   await subscription.readyPromise;
   return subscription.signalObject;
 }
 
 const parsePatches = (patches: DeepPatch[]) => {
-  let modifiedIds: string[] = [];
-  let eventType = "updated";
+  let modifiedIds : Record<string, 'created' | 'updated' | 'deleted'> = {};
 
   for( const patch of patches) {
     // The path property include the @id property first, then the modified field
-    const id = (patch.path[0] as string).split('|')[0];
+    const [graphId] = (patch.path[0] as string).split('|');
     const modifiedField = patch.path[1] as string;
-
-    // If an add operation involves an @id, this is a creation
-    if (patch.op === "add" && modifiedField === "@id") {
-      eventType = "created";
-    }
 
     // If a remove operation includes only the ID, this is a deletion
     if (patch.op === "remove" && !modifiedField) {
-      eventType = "deleted";
+      modifiedIds[graphId] = 'deleted';
     }
 
-    // Avoid duplicates
-    if (!modifiedIds.includes(id)) {
-      modifiedIds.push(id);
+    // If an add operation involves an @id, this is a creation
+    if (patch.op === "add" && modifiedField === "@id") {
+      if (modifiedIds[graphId] === 'deleted') {
+        // If the object was previously marked as deleted, consider this an update instead
+        modifiedIds[graphId] = 'updated';
+      } else {
+        modifiedIds[graphId] = 'created';
+      }
+    }
+
+    if (modifiedIds[graphId] !== 'created' && modifiedIds[graphId] !== 'deleted') {
+      modifiedIds[graphId] = 'updated';
     }
   };
 
-  return { eventType, modifiedIds };
+  return modifiedIds;
 }
 
 const liveProvider = ({ dataModels }: LiveProviderConfig) : LiveProvider => ({
   subscribe: async ({ channel, params, types, callback, meta }) : Promise<UnwatchFn> => {
-    console.log('subscribe', channel, params, types, meta);
+    console.log('subscribe', channel, params?.subscriptionType, params, types, meta);
+    console.trace('subscribe trace', channel, params?.subscriptionType)
 
     const ids = params?.ids as string[];
 
@@ -61,13 +66,15 @@ const liveProvider = ({ dataModels }: LiveProviderConfig) : LiveProvider => ({
           const { stopListening } = watch(set, ({ newValue, patches }) => {
             console.log('object modified', newValue, patches);
 
-            const { eventType, modifiedIds } = parsePatches(patches);
+            const modifiedIds = parsePatches(patches);
 
-            if (modifiedIds.length > 0) {
+            console.log('modifiedIds', modifiedIds);
+
+            for( const [graphId, eventType] of Object.entries(modifiedIds)) {
               callback({
                 channel,
                 type: eventType,
-                payload: { ids: modifiedIds },
+                payload: { ids: [graphId] },
                 date: new Date(),
               });
             }
@@ -78,16 +85,20 @@ const liveProvider = ({ dataModels }: LiveProviderConfig) : LiveProvider => ({
         } else {
           const set = await getSignalObject(dataModels[resource].shapeType);
 
+          console.log('set listening list', set);
+
           const { stopListening } = watch(set, ({ newValue, patches }) => {
             console.log('objects list modified', newValue, patches);
 
-            const { eventType, modifiedIds } = parsePatches(patches);
+            const modifiedIds = parsePatches(patches);
 
-            if (modifiedIds.length > 0) {
+            console.log('modifiedIds', modifiedIds);
+
+            for( const [graphId, eventType] of Object.entries(modifiedIds)) {
               callback({
                 channel,
                 type: eventType,
-                payload: { ids: modifiedIds },
+                payload: { ids: [graphId] },
                 date: new Date(),
               });
             }
@@ -100,9 +111,11 @@ const liveProvider = ({ dataModels }: LiveProviderConfig) : LiveProvider => ({
 
     return () => undefined;
   },
-  unsubscribe: async (unwatchFn: UnwatchFn) => {
-    if (typeof unwatchFn === "function") {
-      unwatchFn();
+  unsubscribe: async (unwatchFn: UnwatchFn | Promise<UnwatchFn>) => {
+    console.log('unsubscribe', typeof unwatchFn, unwatchFn);
+    const fn = await Promise.resolve(unwatchFn);
+    if (typeof fn === "function") {
+      fn();
     }
   }
 });

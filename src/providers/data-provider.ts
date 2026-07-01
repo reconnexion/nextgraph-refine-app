@@ -12,6 +12,13 @@ const isGraphKey = (key: BaseKey): boolean => {
   return key !== null && typeof key === "string" && key.includes(":v:");
 }
 
+const addIdToObject = (obj: any) => {
+  if (!obj["@graph"]) {
+    throw new Error("Object is missing @graph property");
+  }
+  return { id: obj["@graph"], ...obj };
+};
+
 const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
   getList: async ({ resource, pagination, sorters, filters, meta }) => {
     console.log('list', resource, pagination, sorters, filters, meta);
@@ -19,7 +26,7 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
     const objects = await getObjects(dataModels[resource].shapeType, "");
 
     return {
-      data: [...objects].map((obj) => ({id: obj["@graph"], ...obj})) as any,
+      data: [...objects].map(addIdToObject) as any,
       total: 1,
     };
   },
@@ -50,8 +57,10 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
 
     const newData = set.first();
 
+    console.log('create return value', addIdToObject({ ...newData }));
+
     return {
-      data: { ...newData } as any,
+      data: addIdToObject({ ...newData }),
     };
   },
   update: async ({ resource, id, variables, meta }) => {
@@ -66,7 +75,7 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
 
     const oldData = set.first()!;
 
-    const objectId = oldData["@graph"];
+    const objectId = oldData["@id"];
 
     const newData = {
       "@graph": id,
@@ -75,13 +84,16 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
       ...variables
     };
 
+    console.log('oldData', {...oldData});
+    console.log('newData', newData);
+
     // Delete old data and add new data to the set
     // Hopefully the ORM will handle this intelligently
     set.delete(oldData);
     set.add(newData);
 
     return {
-      data: newData as any
+      data: addIdToObject(newData)
     };
   },
   deleteOne: async ({ resource, id, variables, meta }) => {
@@ -99,7 +111,7 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
     set.delete(oldData);
 
     return {
-      data: { ...oldData } as any
+      data: addIdToObject({ ...oldData })
     };
   },
   getOne: async ({ resource, id, meta }) => {
@@ -109,7 +121,7 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
     const objects = await getObjects(dataModels[resource].shapeType, isGraphKey(id) ? `${id}` : { subjects: [`${id}`] });
 
     return {
-      data: [...objects][0] as any
+      data: addIdToObject([...objects][0])
     }
   },
   getApiUrl: () => "",

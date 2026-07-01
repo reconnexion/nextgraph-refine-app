@@ -39,7 +39,7 @@ export const postSchema = {
           },
         ],
         maxCardinality: 1,
-        minCardinality: 1,
+        minCardinality: 0,
         iri: "https://www.w3.org/ns/activitystreams#content",
         readablePredicate: "content",
       },

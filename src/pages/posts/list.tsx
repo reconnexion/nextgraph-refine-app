@@ -10,6 +10,10 @@ import { useNavigation } from "@refinedev/core";
 import { Table, Space } from "antd";
 import type { Note } from "../../shapes/orm/post.typings";
 
+const shortenNuri = (nuri: string) => {
+  return nuri?.split(':')[3]?.slice(0, 7);
+};
+
 export const PostList = () => {
   const { tableProps } = useTable<Note>();
   const { show } = useNavigation();
@@ -24,8 +28,9 @@ export const PostList = () => {
           style: { cursor: "pointer" },
         })}
       >
+        <Table.Column dataIndex="@graph" title="ID" render={shortenNuri} />
         <Table.Column dataIndex="title" title="Title" />
-        <Table.Column dataIndex="@graph" title="ID" />
+        <Table.Column dataIndex="content" title="Content" />
         <Table.Column<Note>
           title="Actions"
           dataIndex="actions"

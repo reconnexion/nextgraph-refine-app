@@ -33,5 +33,5 @@ export interface Note {
    *
    * Original IRI: https://www.w3.org/ns/activitystreams#content
    */
-  content: string;
+  content?: string;
 }
