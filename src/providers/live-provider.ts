@@ -1,21 +1,13 @@
 import { LiveProvider } from "@refinedev/core";
-import { OrmSubscription } from "@ng-org/orm";
-import type { ShapeType } from "@ng-org/shex-orm";
-import { DeepSignalSet, DeepPatch, watch } from "@ng-org/alien-deepsignals"
+import { DeepPatch, watch } from "@ng-org/alien-deepsignals"
 import { DataModels } from "../shapes/data-models";
+import { getSignalObject } from "./utils";
 
 type LiveProviderConfig = {
   dataModels: DataModels;
 };
 
 type UnwatchFn = () => void;
-
-const getSignalObject = async (shapeType: ShapeType<any>, ids?: string[]) : Promise<DeepSignalSet<any>> => {
-  console.log('getSignalObject', ids);
-  const subscription = OrmSubscription.getOrCreate(shapeType, { graphs: ids || [''] });
-  await subscription.readyPromise;
-  return subscription.signalObject;
-}
 
 const parsePatches = (patches: DeepPatch[]) => {
   let modifiedIds : Record<string, 'created' | 'updated' | 'deleted'> = {};

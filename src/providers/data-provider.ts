@@ -1,8 +1,9 @@
 import { DataProvider, BaseKey } from "@refinedev/core";
 import { ng } from "@ng-org/web";
-import { OrmSubscription, getObjects } from "@ng-org/orm";
+import { getObjects } from "@ng-org/orm";
 import { session } from "../utils/initNg";
 import type { DataModels } from "../shapes/data-models";
+import { getSignalObject } from "./utils";
 
 type DataProviderConfig = {
   dataModels: DataModels;
@@ -41,12 +42,7 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
       undefined
     );
 
-    const subscription = OrmSubscription.getOrCreate(dataModels[resource].shapeType, {
-      graphs: [docNuri],
-    });
-    await subscription.readyPromise;
-
-    const set = subscription.signalObject;
+    const set = await getSignalObject(dataModels[resource].shapeType, [docNuri]);
 
     set.add({
       "@graph": docNuri,
@@ -57,8 +53,6 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
 
     const newData = set.first();
 
-    console.log('create return value', addIdToObject({ ...newData }));
-
     return {
       data: addIdToObject({ ...newData }),
     };
@@ -66,12 +60,7 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
   update: async ({ resource, id, variables, meta }) => {
     console.log('update', resource, id, variables, meta);
 
-    const subscription = OrmSubscription.getOrCreate(dataModels[resource].shapeType, {
-      graphs: [`${id}`],
-    });
-    await subscription.readyPromise;
-
-    const set = subscription.signalObject;
+    const set = await getSignalObject(dataModels[resource].shapeType, [`${id}`]);
 
     const oldData = set.first()!;
 
@@ -83,9 +72,6 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
       "@id": objectId,
       ...variables
     };
-
-    console.log('oldData', {...oldData});
-    console.log('newData', newData);
 
     // Delete old data and add new data to the set
     // Hopefully the ORM will handle this intelligently
@@ -99,12 +85,7 @@ const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
   deleteOne: async ({ resource, id, variables, meta }) => {
     console.log('deleteOne', resource, id, variables, meta);
 
-    const subscription = OrmSubscription.getOrCreate(dataModels[resource].shapeType, {
-      graphs: [`${id}`],
-    });
-    await subscription.readyPromise;
-
-    const set = subscription.signalObject;
+    const set = await getSignalObject(dataModels[resource].shapeType, [`${id}`]);
 
     const oldData = set.first()!;
 
