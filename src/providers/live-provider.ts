@@ -53,7 +53,8 @@ const liveProvider = ({ dataModels }: LiveProviderConfig) : LiveProvider => ({
       if (dataModels[resource]) {
 
         if (ids?.length > 0) {
-          const set = await getSignalObject(dataModels[resource].shapeType, ids);
+          // We don't close the subscription because we want to keep listening for changes
+          const set = await getSignalObject(dataModels[resource].shapeType, ids, false);
 
           const { stopListening } = watch(set, ({ newValue, patches }) => {
             console.log('object modified', newValue, patches);
@@ -75,7 +76,8 @@ const liveProvider = ({ dataModels }: LiveProviderConfig) : LiveProvider => ({
           return stopListening;
         
         } else {
-          const set = await getSignalObject(dataModels[resource].shapeType);
+          // We don't close the subscription because we want to keep listening for changes
+          const set = await getSignalObject(dataModels[resource].shapeType, undefined, false);
 
           console.log('set listening list', set);
 
