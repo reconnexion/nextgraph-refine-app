@@ -1,24 +1,9 @@
-import { DataProvider, BaseKey } from "@refinedev/core";
+import { DataProvider } from "@refinedev/core";
 import { ng } from "@ng-org/web";
 import { getObjects } from "@ng-org/orm";
 import { session } from "../utils/initNg";
-import type { DataModels } from "../shapes/data-models";
-import { getSignalObject } from "./utils";
-
-type DataProviderConfig = {
-  dataModels: DataModels;
-};
-
-const isGraphKey = (key: BaseKey): boolean => {
-  return key !== null && typeof key === "string" && key.includes(":v:");
-}
-
-const addIdToObject = (obj: any) => {
-  if (!obj["@graph"]) {
-    throw new Error("Object is missing @graph property");
-  }
-  return { id: obj["@graph"], ...obj };
-};
+import { addIdToObject, isGraphKey, getSignalObject } from "./utils";
+import { DataProviderConfig } from "./types";
 
 const dataProvider = ({ dataModels }: DataProviderConfig) : DataProvider => ({
   getList: async ({ resource, pagination, sorters, filters, meta }) => {

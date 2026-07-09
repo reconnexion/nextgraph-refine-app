@@ -1,11 +1,5 @@
-import type { ShapeType } from "@ng-org/shex-orm";
 import { NoteShapeType } from "./orm/post.shapeTypes";
-
-export type DataModel = {
-  shapeType: ShapeType<any>; 
-}
-
-export type DataModels = Record<string, DataModel>;
+import { DataModels } from "../providers/types";
 
 const dataModels : DataModels = {
   posts: {
